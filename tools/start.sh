@@ -6,22 +6,22 @@ shopt -s expand_aliases
 # Install local requirements
 pip3 install -r requirements.txt
 
-# Network airflow_summit_network declared as external, but could not be found.
-# Please create the network manually using `docker network create airflow_summit_network` and try again.
+# Network airbyte-dbt-airflow-poc-network declared as external, but could not be found.
+# Please create the network manually using `docker network create airbyte-dbt-airflow-poc-network` and try again.
 
 
-docker network create -d bridge airflow_summit_network
+docker network create -d bridge airbyte-dbt-airflow-poc-network
 
 # configure octavia in the script
 OCTAVIA_ENV_FILE=${HOME}/.octavia
-DBT_PROFILE_FILE=${HOME}/.dbt/profiles.yaml
-alias octavia='docker run -i --rm -v $(pwd):/home/octavia-project --network airflow_summit_network --env-file ${OCTAVIA_ENV_FILE} --user $(id -u):$(id -g) airbyte/octavia-cli:0.39.0-alpha --airbyte-url http://airbyte-server:8001'
+DBT_PROFILE_FILE=${HOME}/.dbt/profiles.yml
+alias octavia="docker run -i --rm -v \$(pwd):/home/octavia-project --network airbyte-dbt-airflow-poc-network --env-file \${OCTAVIA_ENV_FILE} --user \$(id -u):\$(id -g) airbyte/octavia-cli:0.50.4 --airbyte-url http://host.docker.internal:8000"
 
 # Cleanup old state files
 rm -rf airbyte/*/*/state.yaml
 
 # Because of Mac M1 + dbt, we need to use an older version of postgres for now
-docker run --name dest --network airflow_summit_network -e POSTGRES_USER=demo_user -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:10
+docker run --name dest --network airbyte-dbt-airflow-poc-network -e POSTGRES_USER=demo_user -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:11
 
 cd airflow
 cp ${DBT_PROFILE_FILE} dbt/profiles.yml
@@ -30,13 +30,15 @@ rm -f dbt/profiles.yml
 cd ..
 docker-compose -f airflow/docker-compose.yaml up -d airflow-init
 docker-compose -f airflow/docker-compose.yaml up -d
-docker exec airflow-webserver airflow connections add 'airbyte_default' --conn-uri 'http://airbyte-server:8001'
-docker-compose -f airbyte/docker-compose.yaml up -d
-
-echo "wait airbyte to be ready..."
-bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8001/api/v1/health)" != "200" ]]; do echo "  [`date`] waiting...." && sleep 5; done'
+docker exec airflow-webserver airflow connections add 'airbyte_default' --conn-uri 'http://airbyte-proxy:8000'
 
 cd airbyte
+chmod +x run-ab-platform.sh
+bash run-ab-platform.sh -b
+
+echo "wait airbyte to be ready..."
+while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8000/api/v1/health -H 'Authorization: Basic YWlyYnl0ZTpwYXNzd29yZA==')" != "200" ]]; do echo "  [`date`] waiting...." && sleep 5; done
+
 octavia init
 octavia apply -f sources/fake_users/configuration.yaml
 octavia apply -f destinations/postgres_destination/configuration.yaml
@@ -54,5 +56,5 @@ else
     exit 0
 fi
 
-docker stop dest
-docker rm dest
+# docker stop dest
+# docker rm dest

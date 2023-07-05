@@ -44,7 +44,7 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.3.0}
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.6.2}
   # build: .
   environment:
     &airflow-common-env
@@ -75,7 +75,7 @@ services:
   postgres:
     image: postgres:13
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     container_name: airflow-pg
     environment:
       POSTGRES_USER: airflow
@@ -92,7 +92,7 @@ services:
   redis:
     image: redis:latest
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     container_name: airflow-redis
     expose:
       - 6379
@@ -107,7 +107,7 @@ services:
     <<: *airflow-common
     command: webserver
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     container_name: airflow-webserver
     ports:
       - 8080:8080
@@ -126,7 +126,7 @@ services:
     <<: *airflow-common
     command: scheduler
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     container_name: airflow-scheduler
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
@@ -144,7 +144,7 @@ services:
     command: celery worker
     container_name: airflow-worker
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     healthcheck:
       test:
         - "CMD-SHELL"
@@ -167,7 +167,7 @@ services:
     <<: *airflow-common
     command: triggerer
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     container_name: airflow-triggerer
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
@@ -184,7 +184,7 @@ services:
     <<: *airflow-common
     entrypoint: /bin/bash
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     container_name: airflow-init
     # yamllint disable rule:line-length
     command:
@@ -265,7 +265,7 @@ services:
   airflow-cli:
     <<: *airflow-common
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     profiles:
       - debug
     environment:
@@ -281,7 +281,7 @@ services:
     <<: *airflow-common
     command: celery flower
     networks:
-    - airflow_summit_network
+    - airbyte-dbt-airflow-poc-network
     ports:
       - 5555:5555
     healthcheck:
@@ -299,5 +299,5 @@ volumes:
   postgres-db-volume:
 
 networks:
-  airflow_summit_network:
+  airbyte-dbt-airflow-poc-network:
     external: true
