@@ -32,7 +32,7 @@ DBT_PROJECT_DIR = "/opt/airflow/dbt/"
 
 def get_ab_conn_id(ds=None, **kwargs):
     ab_url = "http://host.docker.internal:8001/api/v1"
-    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    headers = {"Accept": "application/json", "Content-Type": "application/json", "Authorization": "Basic YWlyYnl0ZTpwYXNzd29yZA=="}
     workspace_id = requests.post(f"{ab_url}/workspaces/list", headers=headers).json().get("workspaces")[0].get("workspaceId")
     payload = json.dumps({"workspaceId": workspace_id})
     connections = requests.post(f"{ab_url}/connections/list", headers=headers, data=payload).json().get("connections")
@@ -42,7 +42,7 @@ def get_ab_conn_id(ds=None, **kwargs):
 
 
 with DAG(
-    dag_id='airflow_summit_airbyte',
+    dag_id='airbyte-dbt-airflow-poc',
     schedule_interval='@daily',
     start_date=datetime(2021, 1, 1),
     dagrun_timeout=timedelta(minutes=60),
@@ -75,3 +75,4 @@ with DAG(
 
 
     sync_source_destination >> dbt_deps >> dbt_run
+

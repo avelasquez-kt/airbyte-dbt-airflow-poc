@@ -30,7 +30,13 @@ rm -f dbt/profiles.yml
 cd ..
 docker compose -f airflow/docker-compose.yaml up -d airflow-init
 docker compose -f airflow/docker-compose.yaml up -d
-docker exec airflow-webserver airflow connections add airbyte_default --conn-uri http://host.docker.internal:8000
+docker exec airflow-webserver airflow connections add 'airbyte_default' --conn-json '{
+                                                                                        "conn_type": "http",
+                                                                                        "login": "airbyte",
+                                                                                        "password": "password",
+                                                                                        "host": "host.docker.internal",
+                                                                                        "port": 8000
+                                                                                    }'
 
 cd airbyte
 chmod +x run-ab-platform.sh
@@ -46,7 +52,7 @@ octavia apply -f destinations/postgres_destination/configuration.yaml
 octavia apply -f connections/demo_connection/configuration.yaml
 
 touch $(pwd)/test.log
-docker exec airflow-webserver airflow dags test airflow_summit_airbyte 2022-01-01 | tee $(pwd)/test.log
+docker exec airflow-webserver airflow dags test airbyte-dbt-airflow-poc 2022-01-01 | tee $(pwd)/test.log
 
 if [[ $(grep "Some task instances failed:" $(pwd)/test.log) ]]; then
     echo "The dag exit with errors"

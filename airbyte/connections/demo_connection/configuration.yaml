@@ -11,7 +11,7 @@ configuration:
   sync_catalog:
     streams:
     - config:
-        alias_name: Users
+        alias_name: users
         cursor_field: []
         destination_sync_mode: append
         primary_key: []
@@ -60,7 +60,7 @@ configuration:
             website:
               type: array
           type: object
-        name: Users
+        name: users
         namespace: public
         source_defined_cursor: true
         source_defined_primary_key: []
