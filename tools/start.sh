@@ -28,8 +28,8 @@ cp ${DBT_PROFILE_FILE} dbt/profiles.yml
 docker build . -t airflow-airbyte:1.0.0
 rm -f dbt/profiles.yml
 cd ..
-docker-compose -f airflow/docker-compose.yaml up -d airflow-init
-docker-compose -f airflow/docker-compose.yaml up -d
+docker compose -f airflow/docker compose.yaml up -d airflow-init
+docker compose -f airflow/docker compose.yaml up -d
 docker exec airflow-webserver airflow connections add 'airbyte_default' --conn-uri 'http://airbyte-proxy:8000'
 
 cd airbyte
