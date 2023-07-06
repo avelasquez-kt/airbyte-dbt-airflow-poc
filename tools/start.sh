@@ -30,7 +30,7 @@ rm -f dbt/profiles.yml
 cd ..
 docker compose -f airflow/docker-compose.yaml up -d airflow-init
 docker compose -f airflow/docker-compose.yaml up -d
-docker exec airflow-webserver airflow connections add 'airbyte_default' --conn-uri 'http://airbyte-proxy:8000'
+docker exec airflow-webserver airflow connections add airbyte_default --conn-uri http://airbyte-proxy:8000
 
 cd airbyte
 chmod +x run-ab-platform.sh
