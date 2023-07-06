@@ -18,7 +18,7 @@ DBT_PROFILE_FILE=${HOME}/.dbt/profiles.yml
 alias octavia="docker run -i --rm -v \$(pwd):/home/octavia-project --network airbyte-dbt-airflow-poc-network --env-file \${OCTAVIA_ENV_FILE} --user \$(id -u):\$(id -g) airbyte/octavia-cli:0.50.4 --airbyte-url http://host.docker.internal:8000"
 
 # Cleanup old state files
-rm -rf airbyte/*/*/state.yaml
+rm -rf airbyte/*/*/state*.yaml
 
 # Because of Mac M1 + dbt, we need to use an older version of postgres for now
 docker run --name dest --network airbyte-dbt-airflow-poc-network -e POSTGRES_USER=demo_user -e POSTGRES_PASSWORD=password -p 5432:5432 -d postgres:11
