@@ -61,13 +61,13 @@ configuration:
               type: array
           type: object
         name: Users
-        namespace: null
-        source_defined_cursor: null
+        namespace: public
+        source_defined_cursor: true
         source_defined_primary_key: []
         supported_sync_modes:
         - full_refresh
         - incremental
 definition_type: connection
-destination_id: 226ef45e-5fb8-4fc5-9fcc-f7143cbfde3e
 resource_name: demo_connection
-source_id: 13025151-9883-4d4c-939b-c25a455d9fc6
+source_configuration_path: sources/fake_users/configuration.yaml
+destination_configuration_path: destinations/postgres_destination/configuration.yaml

@@ -30,7 +30,7 @@ rm -f dbt/profiles.yml
 cd ..
 docker compose -f airflow/docker-compose.yaml up -d airflow-init
 docker compose -f airflow/docker-compose.yaml up -d
-docker exec airflow-webserver airflow connections add airbyte_default --conn-uri http://airbyte-proxy:8000
+docker exec airflow-webserver airflow connections add airbyte_default --conn-uri http://host.docker.internal:8000
 
 cd airbyte
 chmod +x run-ab-platform.sh
@@ -42,7 +42,7 @@ while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:8000/api/v1/healt
 octavia init
 octavia apply -f sources/fake_users/configuration.yaml
 octavia apply -f destinations/postgres_destination/configuration.yaml
-cd ..; python3 tools/change_resource_id.py; cd airbyte
+# cd ..; python3 tools/change_resource_id.py; cd airbyte
 octavia apply -f connections/demo_connection/configuration.yaml
 
 touch $(pwd)/test.log
